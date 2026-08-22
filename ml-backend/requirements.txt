@@ -1,0 +1,12 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pymongo==4.10.1
+python-dotenv==1.0.1
+cloudinary==1.41.0
+requests==2.32.3
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+Pillow==11.0.0
+# Install ultralytics only when you switch USE_MOCK_MODEL to false.
+# It pulls in torch, which is a large download.
+ultralytics==8.3.40

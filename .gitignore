@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# environment — never commit real credentials
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# builds
+dist/
+build/
+.vercel/
+.vite/
+
+# model weights (large binaries — distribute separately)
+ml-backend/models/*.pt
+ml-backend/models/*.onnx
+ml-backend/models/*.engine
+
+# runtime artefacts
+runs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

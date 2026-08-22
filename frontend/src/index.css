@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+
+  /* Keyboard users must always be able to see where they are. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-600 ring-offset-2 ring-offset-white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink-line bg-white shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+           transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-55;
+  }
+  .btn-primary {
+    @apply btn bg-brand-900 text-white hover:bg-brand-800;
+  }
+  .btn-secondary {
+    @apply btn border border-ink-line bg-white text-ink hover:bg-zinc-50;
+  }
+  .btn-ghost {
+    @apply btn text-ink-soft hover:bg-zinc-100;
+  }
+  .btn-danger {
+    @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-ink-line bg-white px-3.5 py-2.5 text-sm text-ink
+           placeholder:text-ink-muted focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-ink-soft;
+  }
+
+  /* The eyebrow is used above section headings to carry the section's role. */
+  .eyebrow {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-brand-700;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-zinc-100;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer
+           bg-gradient-to-r from-transparent via-white/70 to-transparent;
+  }
+}
+
+/* ---- Leaflet overrides so the map matches the rest of the product ---- */
+.leaflet-container {
+  @apply font-sans;
+  background: #eef0f3;
+}
+.leaflet-popup-content-wrapper {
+  @apply rounded-xl shadow-lift;
+  padding: 0;
+}
+.leaflet-popup-content {
+  margin: 0;
+  width: 232px !important;
+}
+.leaflet-popup-tip {
+  box-shadow: none;
+}
+.leaflet-bar a {
+  @apply text-ink;
+}
+
+/* Severity markers are drawn with divIcon, so they are styled here. */
+.drishti-marker {
+  background: transparent;
+  border: 0;
+}
+.drishti-marker__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+.drishti-marker__ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+}
