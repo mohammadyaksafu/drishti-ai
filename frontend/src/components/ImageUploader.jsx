@@ -120,7 +120,7 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
             : 'border-ink-line bg-white hover:border-brand-300 hover:bg-brand-50/40'
         } ${disabled ? 'pointer-events-none opacity-60' : ''}`}
       >
-        <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-900 text-white">
+        <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient text-white shadow-glow">
           <ImagePlus className="h-7 w-7" aria-hidden="true" />
         </span>
         <p className="font-display text-base font-semibold text-ink">Upload road image</p>

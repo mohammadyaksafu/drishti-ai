@@ -32,7 +32,7 @@ function LifecycleRail({ current }) {
           <li key={step.key} className="flex items-center gap-1.5">
             <span
               className={`rounded-full px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                done ? 'bg-brand-900 text-white' : 'bg-zinc-100 text-ink-muted'
+                done ? 'bg-brand-gradient text-white shadow-btn-primary' : 'bg-zinc-100 text-ink-muted'
               }`}
             >
               {step.label}

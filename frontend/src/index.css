@@ -14,10 +14,15 @@
 
   body {
     @apply bg-canvas font-sans text-ink antialiased;
+    font-feature-settings: 'cv11', 'ss01';
   }
 
   h1, h2, h3, h4 {
     @apply font-display tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
   }
 
   /* Keyboard users must always be able to see where they are. */
@@ -41,29 +46,41 @@
   }
 
   .card {
-    @apply rounded-2xl border border-ink-line bg-white shadow-card;
+    @apply rounded-2xl border border-ink-line/80 bg-white shadow-card;
+  }
+  .card-hover {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift;
   }
 
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
-           transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-55;
+           transition duration-150 active:translate-y-px disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-brand-900 text-white hover:bg-brand-800;
+    @apply btn bg-brand-gradient text-white shadow-btn-primary hover:brightness-110;
   }
   .btn-secondary {
-    @apply btn border border-ink-line bg-white text-ink hover:bg-zinc-50;
+    @apply btn border border-ink-line bg-white text-ink shadow-sm hover:border-brand-200 hover:bg-brand-50/50;
   }
   .btn-ghost {
-    @apply btn text-ink-soft hover:bg-zinc-100;
+    @apply btn text-ink-soft hover:bg-ink/[0.05] hover:text-ink;
   }
   .btn-danger {
     @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
   }
+  /* For dark surfaces: hero, page headers, CTA band. */
+  .btn-light {
+    @apply btn bg-white text-night-950 shadow-lg shadow-black/20 hover:bg-brand-50;
+  }
+  .btn-outline-light {
+    @apply btn border border-white/15 bg-white/5 text-white backdrop-blur hover:border-white/30 hover:bg-white/10;
+  }
 
   .field {
-    @apply w-full rounded-xl border border-ink-line bg-white px-3.5 py-2.5 text-sm text-ink
-           placeholder:text-ink-muted focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-xl border border-ink-line bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm
+           transition placeholder:text-ink-muted/80 hover:border-ink-muted/40
+           focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100
+           disabled:cursor-not-allowed disabled:bg-canvas;
   }
 
   .label {
@@ -72,11 +89,30 @@
 
   /* The eyebrow is used above section headings to carry the section's role. */
   .eyebrow {
-    @apply font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-brand-700;
+    @apply inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-brand-700;
+  }
+  .eyebrow-light {
+    @apply eyebrow text-brand-300;
+  }
+
+  .section-title {
+    @apply mt-3 max-w-2xl font-display text-3xl font-bold text-ink sm:text-4xl;
+  }
+
+  .text-gradient {
+    @apply bg-accent-gradient bg-clip-text text-transparent;
+  }
+
+  .icon-tile {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100;
+  }
+
+  .alert-error {
+    @apply rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800;
   }
 
   .skeleton {
-    @apply relative overflow-hidden rounded-lg bg-zinc-100;
+    @apply relative overflow-hidden rounded-lg bg-ink/[0.06];
   }
   .skeleton::after {
     content: '';
@@ -85,14 +121,32 @@
   }
 }
 
+@layer utilities {
+  /* Fine engineering grid used behind dark surfaces. */
+  .bg-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .bg-grid-light {
+    background-image: linear-gradient(rgba(20, 21, 43, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 21, 43, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  }
+}
+
 /* ---- Leaflet overrides so the map matches the rest of the product ---- */
 .leaflet-container {
-  @apply font-sans;
-  background: #eef0f3;
+  @apply rounded-2xl font-sans;
+  background: #eceef5;
 }
 .leaflet-popup-content-wrapper {
   @apply rounded-xl shadow-lift;
   padding: 0;
+  overflow: hidden;
 }
 .leaflet-popup-content {
   margin: 0;
@@ -100,6 +154,9 @@
 }
 .leaflet-popup-tip {
   box-shadow: none;
+}
+.leaflet-bar {
+  @apply overflow-hidden rounded-xl border-0 shadow-card !important;
 }
 .leaflet-bar a {
   @apply text-ink;

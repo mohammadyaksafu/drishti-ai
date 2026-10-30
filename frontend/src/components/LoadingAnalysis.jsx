@@ -25,7 +25,7 @@ export default function LoadingAnalysis({ status = 'pending', elapsedMs = 0, job
 
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-ink-line bg-brand-900 px-6 py-5 text-white">
+      <div className="relative overflow-hidden border-b border-ink-line bg-night-950 px-6 py-5 text-white">
         <div className="flex items-center gap-3">
           <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/10">
             <Cpu className="h-5 w-5" aria-hidden="true" />

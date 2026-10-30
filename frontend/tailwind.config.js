@@ -19,7 +19,14 @@ export default {
           900: '#4c1d95',
           950: '#2e1065',
         },
-        magenta: { 500: '#d946ef', 600: '#c026d3' },
+        magenta: { 400: '#e879f9', 500: '#d946ef', 600: '#c026d3' },
+        // The dark surfaces used for the hero, footer and page headers.
+        night: {
+          700: '#2a2d55',
+          800: '#1a1c3a',
+          900: '#11122b',
+          950: '#0a0b1d',
+        },
         // Severity palette. These four are used everywhere: badges, markers,
         // charts, the annotated image, so the same colour always means the same thing.
         sev: {
@@ -29,12 +36,12 @@ export default {
           critical: '#dc2626',
         },
         ink: {
-          DEFAULT: '#18181b',
-          soft: '#3f3f46',
-          muted: '#71717a',
-          line: '#e4e4e7',
+          DEFAULT: '#14152b',
+          soft: '#3d4060',
+          muted: '#6b6f8a',
+          line: '#e4e5ef',
         },
-        canvas: '#fafafa',
+        canvas: '#f6f6fb',
       },
       fontFamily: {
         display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
@@ -42,10 +49,17 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 2px rgba(24,24,27,0.04), 0 4px 16px rgba(24,24,27,0.06)',
-        lift: '0 2px 4px rgba(24,24,27,0.05), 0 12px 32px rgba(24,24,27,0.10)',
+        card: '0 1px 2px rgba(20,21,43,0.04), 0 2px 12px rgba(20,21,43,0.04)',
+        lift: '0 2px 4px rgba(20,21,43,0.04), 0 16px 40px -8px rgba(20,21,43,0.14)',
+        glow: '0 0 0 1px rgba(139,92,246,0.25), 0 12px 40px -8px rgba(124,58,237,0.45)',
+        'btn-primary':
+          'inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(46,16,101,0.3), 0 6px 16px -6px rgba(76,29,149,0.55)',
       },
       borderRadius: { xl2: '1.25rem' },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #6d28d9 0%, #4c1d95 55%, #2e1065 100%)',
+        'accent-gradient': 'linear-gradient(90deg, #a78bfa 0%, #e879f9 100%)',
+      },
       keyframes: {
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
@@ -57,11 +71,21 @@ export default {
           '100%': { opacity: '0' },
         },
         shimmer: { '100%': { transform: 'translateX(100%)' } },
+        scan: {
+          '0%': { top: '0%' },
+          '100%': { top: '100%' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
       },
       animation: {
-        'fade-up': 'fade-up 0.4s ease-out both',
+        'fade-up': 'fade-up 0.5s ease-out both',
         'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4,0,0.6,1) infinite',
         shimmer: 'shimmer 1.6s infinite',
+        scan: 'scan 3.2s ease-in-out infinite alternate',
+        float: 'float 5s ease-in-out infinite',
       },
     },
   },

@@ -178,7 +178,7 @@ export default function RoadHazardMap({
                     {marker.id && (
                       <Link
                         to={`/report/${marker.id}`}
-                        className="mt-3 block rounded-lg bg-brand-900 px-3 py-1.5 text-center text-xs font-semibold text-white hover:bg-brand-800"
+                        className="mt-3 block rounded-lg bg-brand-gradient px-3 py-1.5 text-center text-xs font-semibold text-white hover:brightness-110"
                       >
                         View report
                       </Link>

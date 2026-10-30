@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Users, Shield, Trash2, CheckCircle2, Search, Cpu, Loader2, Activity, RotateCcw,
 } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import { SkeletonRows } from '../components/Skeleton';
 import { SeverityBadge, StatusBadge, ResolutionBadge } from '../components/StatusBadge';
@@ -77,7 +78,7 @@ function ReportsTab() {
             type="button"
             onClick={() => setFilter(value)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              filter === value ? 'bg-brand-900 text-white' : 'bg-white text-ink-soft hover:bg-zinc-100'
+              filter === value ? 'bg-brand-gradient text-white shadow-btn-primary' : 'bg-white text-ink-soft hover:bg-zinc-100'
             }`}
           >
             {label}
@@ -424,42 +425,46 @@ export default function Admin() {
   const [tab, setTab] = useState('reports');
 
   return (
-    <div className="container-page py-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow">Administration</p>
-          <h1 className="mt-2 font-display text-3xl font-bold text-ink">Admin panel</h1>
-          <p className="mt-2 text-ink-soft">
-            Manage accounts, close out repairs, and watch the AI pipeline.
-          </p>
+    <>
+      <PageHeader
+        eyebrow="Administration"
+        title="Admin panel"
+        description="Manage accounts, close out repairs, and watch the AI pipeline."
+        actions={
+          <Link to="/dashboard" className="btn-outline-light">
+            Open dashboard
+          </Link>
+        }
+      />
+      <div className="container-page py-8 sm:py-10">
+        <div
+          className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border border-ink-line bg-white p-1 shadow-card"
+          role="tablist"
+        >
+          {TABS.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.key}
+              onClick={() => setTab(item.key)}
+              className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                tab === item.key
+                  ? 'bg-brand-gradient text-white shadow-btn-primary'
+                  : 'text-ink-muted hover:bg-canvas hover:text-ink'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
-        <Link to="/dashboard" className="btn-secondary">Open dashboard</Link>
-      </header>
 
-      <div className="mt-8 flex gap-1 border-b border-ink-line" role="tablist">
-        {TABS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === item.key}
-            onClick={() => setTab(item.key)}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
-              tab === item.key
-                ? 'border-brand-800 text-brand-900'
-                : 'border-transparent text-ink-muted hover:text-ink'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+        <div className="mt-6">
+          {tab === 'reports' && <ReportsTab />}
+          {tab === 'users' && <UsersTab currentUserId={user?.id} />}
+          {tab === 'pipeline' && <PipelineTab />}
+        </div>
       </div>
-
-      <div className="mt-6">
-        {tab === 'reports' && <ReportsTab />}
-        {tab === 'users' && <UsersTab currentUserId={user?.id} />}
-        {tab === 'pipeline' && <PipelineTab />}
-      </div>
-    </div>
+    </>
   );
 }

@@ -638,3 +638,24 @@ pothole photographed by twenty people is one hazard, and offline queueing for po
 ---
 
 Built as a prototype. Map data © OpenStreetMap contributors.
+
+---
+
+## Deploying to a VPS
+
+An alternative to Vercel, live at <http://165.99.219.251:8090/>. The API runs under PM2 on
+`127.0.0.1:5000`, and a `caddy:2-alpine` container on the host network serves the built frontend
+and proxies `/api` to the API on the same origin. Nothing is installed system-wide, so the other
+sites on the server are untouched. Files live in `deploy/`.
+
+```bash
+# from your machine: ship the code
+tar --exclude=node_modules --exclude=dist --exclude=ml-backend -czf - backend frontend deploy   | ssh root@165.99.219.251 'mkdir -p /var/www/drishti-ai && tar -C /var/www/drishti-ai -xzf -'
+
+# on the VPS (first time only: create backend/.env with NODE_ENV=production and
+# CLIENT_URL=http://165.99.219.251:8090)
+sudo bash /var/www/drishti-ai/deploy/setup-vps.sh 8090
+```
+
+Re-run both steps to ship an update. MongoDB Atlas must allow the VPS IP under *Network Access*.
+The ML worker still runs on your local machine.
