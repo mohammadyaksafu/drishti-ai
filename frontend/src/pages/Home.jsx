@@ -306,7 +306,7 @@ export default function Home() {
               {t('hero.body')}
             </p>
 
-            <div className="mt-9 flex animate-fade-up flex-wrap gap-3" style={{ animationDelay: '1050ms' }}>
+            <div className="mt-9 grid animate-fade-up gap-3 sm:flex sm:flex-wrap" style={{ animationDelay: '1050ms' }}>
               <Link to="/report" className="btn-primary btn-glow px-6 py-3.5 text-base">
                 <Camera className="h-5 w-5" aria-hidden="true" />
                 {t('hero.ctaReport')}

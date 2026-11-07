@@ -74,7 +74,7 @@ export default function Navbar() {
       isActive ? 'bg-white/10 text-white' : 'text-white/70'
     }`;
 
-  const showFab = !['/report', '/login', '/register'].includes(pathname) && !open;
+  const showFab = !['/report', '/login', '/register', '/map'].includes(pathname) && !open;
 
   return (
     <>

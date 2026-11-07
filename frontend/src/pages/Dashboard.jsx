@@ -120,7 +120,7 @@ export default function Dashboard() {
       />
       <div className="container-page py-8 sm:py-10">
         {/* headline stats */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Headline statistics">
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-label="Headline statistics">
           <StatCard label="Total reports" value={stats.totals.total} icon={FileBarChart} accent="#006a4e" />
           <StatCard
             label="Critical hazards"
@@ -144,7 +144,7 @@ export default function Dashboard() {
           />
         </section>
 
-        <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Secondary statistics">
+        <section className="mt-3 grid grid-cols-2 gap-3 sm:mt-4 sm:gap-4 lg:grid-cols-4" aria-label="Secondary statistics">
           <StatCard label="High severity" value={stats.severity.high} accent="#ea580c" />
           <StatCard label="Moderate severity" value={stats.severity.moderate} accent="#f59e0b" />
           <StatCard label="Low severity" value={stats.severity.low} accent="#16a34a" />

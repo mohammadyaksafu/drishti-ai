@@ -148,7 +148,7 @@ function DetailPanel({ marker, onClose, onShowAll }) {
   const score = marker.severityScore ?? marker.overallSeverity ?? 0;
   const resolved = marker.resolutionStatus === 'resolved';
   const type = marker.hazard || marker.primaryHazard;
-  const name = hazard(type, { name: hazardName(type) }).name;
+  const name = !type || type === 'none' ? t('map.noHazard') : hazard(type, { name: hazardName(type) }).name;
   const Icon = HAZARD_ICON_COMPONENTS[type] || CircleDot;
 
   useEffect(() => {
@@ -330,6 +330,8 @@ export default function RoadHazardMap({
         maxBounds={BD_LEAFLET_BOUNDS}
         maxBoundsViscosity={0.9}
         scrollWheelZoom={scrollWheelZoom}
+        zoomSnap={0.25}
+        zoomDelta={0.5}
         zoomControl
         style={{ height: '100%', width: '100%', background: base.bg }}
       >
@@ -392,7 +394,7 @@ export default function RoadHazardMap({
 
       {/* base map switcher */}
       {showControls && (
-      <div className="absolute left-3 top-[86px] z-[800] flex flex-col gap-1 rounded-xl border border-white/20 bg-white/85 p-1 shadow-lg backdrop-blur-md">
+      <div className="absolute bottom-6 left-2 z-[800] flex gap-1 rounded-xl border border-white/20 bg-white/90 p-1 shadow-lg backdrop-blur-md sm:bottom-auto sm:left-3 sm:top-[86px] sm:flex-col">
         {[
           ['light', 'map.style.light'],
           ['dark', 'map.style.dark'],
@@ -414,7 +416,7 @@ export default function RoadHazardMap({
         <button
           type="button"
           onClick={showAll}
-          className="mt-0.5 flex items-center gap-1 rounded-lg border-t border-black/5 px-2.5 py-1.5 text-xs font-semibold text-ink-soft hover:bg-black/5"
+          className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-ink-soft hover:bg-black/5 sm:mt-0.5 sm:border-t sm:border-black/5"
           title={t('map.showAll')}
         >
           <Crosshair className="h-3.5 w-3.5" />

@@ -1,6 +1,6 @@
 export default function StatCard({ label, value, hint, icon: Icon, accent = '#006a4e', loading = false }) {
   return (
-    <div className="card relative overflow-hidden p-5">
+    <div className="card relative overflow-hidden p-4 sm:p-5">
       <span
         className="absolute inset-x-0 top-0 h-0.5"
         style={{ background: `linear-gradient(90deg, ${accent}, ${accent}00)` }}
@@ -12,13 +12,13 @@ export default function StatCard({ label, value, hint, icon: Icon, accent = '#00
           {loading ? (
             <div className="skeleton mt-2 h-8 w-16" />
           ) : (
-            <p className="mt-1.5 font-display text-3xl font-bold tabular-nums tracking-tight text-ink">{value}</p>
+            <p className="mt-1.5 font-display text-2xl font-bold tabular-nums tracking-tight text-ink sm:text-3xl">{value}</p>
           )}
           {hint && <p className="mt-1 text-xs text-ink-muted">{hint}</p>}
         </div>
         {Icon && (
           <span
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+            className="hidden h-10 w-10 shrink-0 place-items-center rounded-xl sm:grid"
             style={{ backgroundColor: `${accent}12`, color: accent, boxShadow: `inset 0 0 0 1px ${accent}22` }}
             aria-hidden="true"
           >

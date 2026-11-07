@@ -80,7 +80,7 @@ export default function MapView() {
 
       <div className="container-page py-8 sm:py-10">
         <div className="grid gap-4 lg:grid-cols-4">
-          <aside className="space-y-4 lg:col-span-1">
+          <aside className="order-2 space-y-4 lg:order-1 lg:col-span-1">
             <section className="card p-4">
               <h2 className="font-display text-sm font-bold text-ink">{t('map.severity')}</h2>
               <div className="mt-3 space-y-1.5">
@@ -174,9 +174,9 @@ export default function MapView() {
             </section>
           </aside>
 
-          <div className="lg:col-span-3">
+          <div className="order-1 lg:order-2 lg:col-span-3">
             {loading && (
-              <div className="grid h-[640px] place-items-center rounded-2xl border border-ink-line bg-night-950">
+              <div className="grid h-[min(640px,72svh)] place-items-center rounded-2xl border border-ink-line bg-night-950">
                 <span className="flex flex-col items-center gap-3 text-sm text-white/70">
                   <span className="relative grid h-14 w-14 place-items-center">
                     <span className="absolute inset-0 animate-pulse-ring rounded-full bg-brand-500/40" />
@@ -188,7 +188,7 @@ export default function MapView() {
             )}
 
             {!loading && error && (
-              <div className="grid h-[640px] place-items-center rounded-2xl border border-ink-line bg-white p-6 text-center">
+              <div className="grid h-[min(640px,72svh)] place-items-center rounded-2xl border border-ink-line bg-white p-6 text-center">
                 <div>
                   <h2 className="font-display text-lg font-bold text-ink">{t('map.errorTitle')}</h2>
                   <p className="mt-1.5 text-sm text-ink-muted">{error}</p>
@@ -201,7 +201,7 @@ export default function MapView() {
             )}
 
             {!loading && !error && markers.length === 0 && (
-              <div className="h-[640px]">
+              <div className="h-[min(640px,72svh)]">
                 <EmptyState
                   icon={MapPinOff}
                   title={t('map.emptyTitle')}
@@ -214,7 +214,7 @@ export default function MapView() {
 
             {!loading && !error && markers.length > 0 && (
               <>
-                <RoadHazardMap markers={markers} height="640px" focus={focus} fitToMarkers={!focus} />
+                <RoadHazardMap markers={markers} height="min(640px, 72svh)" focus={focus} fitToMarkers={!focus} />
                 <p className="mt-3 text-xs text-ink-muted">
                   {t('map.footer', { n: num(markers.length) })}
                 </p>

@@ -12,6 +12,24 @@
     scroll-behavior: smooth;
   }
 
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  .grid > * {
+    min-width: 0;
+  }
+
+  /* iOS zooms into inputs smaller than 16px; avoid that on phones. */
+  @media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
   body {
     @apply bg-canvas font-sans text-ink antialiased;
     font-feature-settings: 'cv11', 'ss01';
