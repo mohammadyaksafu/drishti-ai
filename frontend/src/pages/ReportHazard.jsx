@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import ImageUploader from '../components/ImageUploader';
-import LocationPicker from '../components/LocationPicker';
+import AutoLocation from '../components/AutoLocation';
 import { reportsApi } from '../services/api';
 import { isInsideBangladesh } from '../utils/bangladesh';
 import { formatCoords } from '../utils/format';
@@ -21,7 +21,6 @@ import { useLang } from '../i18n';
 
 const STEPS = [
   { key: 'photo', label: 'rep.s1', icon: Camera, hint: 'rep.s1.h' },
-  { key: 'location', label: 'rep.s2', icon: MapPin, hint: 'rep.s2.h' },
   { key: 'review', label: 'rep.s3', icon: FileText, hint: 'rep.s3.h' },
 ];
 
@@ -29,8 +28,8 @@ const STEPS = [
 function Stepper({ step, canReach, onJump }) {
   const { t, num } = useLang();
   return (
-    <ol className="relative grid grid-cols-3 gap-2">
-      <span className="absolute left-[16.6%] right-[16.6%] top-5 h-[3px] rounded-full bg-ink-line" aria-hidden="true">
+    <ol className="relative grid grid-cols-2 gap-2">
+      <span className="absolute left-1/4 right-1/4 top-5 h-[3px] rounded-full bg-ink-line" aria-hidden="true">
         <span
           className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-600 to-magenta-500 transition-[width] duration-500 ease-out"
           style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
@@ -86,7 +85,7 @@ export default function ReportHazard() {
   const [error, setError] = useState('');
 
   const locationReady = isInsideBangladesh(location.latitude, location.longitude);
-  const stepValid = [Boolean(file), locationReady, true];
+  const stepValid = [Boolean(file) && locationReady, true];
   const canReach = (i) => i === 0 || stepValid.slice(0, i).every(Boolean);
 
   useEffect(() => {
@@ -136,8 +135,8 @@ export default function ReportHazard() {
     }
   }
 
-  const nextLabel = t(['rep.next1', 'rep.next2', 'rep.submit'][step]);
-  const blockedHint = ['rep.need1', 'rep.need2', ''][step] ? t(['rep.need1', 'rep.need2'][step]) : '';
+  const nextLabel = t(['rep.next2', 'rep.submit'][step]);
+  const blockedHint = step === 0 && !stepValid[0] ? t(file ? 'rep.need2' : 'rep.need1') : '';
 
   return (
     <>
@@ -160,18 +159,14 @@ export default function ReportHazard() {
                   <h2 className="font-display text-xl font-bold text-ink">{t('rep.p1.title')}</h2>
                   <p className="mb-5 mt-1 text-sm text-ink-muted">{t('rep.p1.body')}</p>
                   <ImageUploader file={file} onChange={setFile} disabled={submitting} />
+
+                  <h3 className="mt-7 font-display text-lg font-bold text-ink">{t('rep.p2.title')}</h3>
+                  <p className="mb-3 mt-1 text-sm text-ink-muted">{t('rep.p2.body')}</p>
+                  <AutoLocation file={file} value={location} onChange={setLocation} disabled={submitting} />
                 </>
               )}
 
               {step === 1 && (
-                <>
-                  <h2 className="font-display text-xl font-bold text-ink">{t('rep.p2.title')}</h2>
-                  <p className="mb-5 mt-1 text-sm text-ink-muted">{t('rep.p2.body')}</p>
-                  <LocationPicker value={location} onChange={setLocation} disabled={submitting} />
-                </>
-              )}
-
-              {step === 2 && (
                 <>
                   <h2 className="font-display text-xl font-bold text-ink">{t('rep.p3.title')}</h2>
                   <p className="mb-5 mt-1 text-sm text-ink-muted">{t('rep.p3.body')}</p>
@@ -189,11 +184,7 @@ export default function ReportHazard() {
                       </span>
                     </button>
                     <div className="space-y-3">
-                      <button
-                        type="button"
-                        onClick={() => go(1)}
-                        className="flex w-full items-center gap-3 rounded-xl border border-ink-line bg-canvas p-3 text-left transition-colors hover:border-brand-200"
-                      >
+                      <div className="flex w-full items-center gap-3 rounded-xl border border-ink-line bg-canvas p-3 text-left">
                         <span className="icon-tile">
                           <MapPin className="h-5 w-5" aria-hidden="true" />
                         </span>
@@ -203,8 +194,10 @@ export default function ReportHazard() {
                             {formatCoords(location.latitude, location.longitude)}
                           </span>
                         </span>
-                        <span className="ml-auto text-xs font-semibold text-brand-700">{t('rep.change')}</span>
-                      </button>
+                        <span className="ml-auto rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                          {location.source === 'photo' ? t('loc.auto.fromPhoto') : t('loc.auto.fromGps')}
+                        </span>
+                      </div>
 
                       <div>
                         <label htmlFor="locationName" className="label">
