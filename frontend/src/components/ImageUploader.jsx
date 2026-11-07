@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImagePlus, Upload, X, RefreshCw, Camera } from 'lucide-react';
+import { useLang } from '../i18n';
 
 const ACCEPTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const MAX_BYTES = 8 * 1024 * 1024;
 
 /** Drag-and-drop road image picker with preview, replace and remove. */
 export default function ImageUploader({ file, onChange, disabled = false }) {
+  const { t, num } = useLang();
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState('');
@@ -26,17 +28,17 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
     (candidate) => {
       if (!candidate) return;
       if (!ACCEPTED.includes(candidate.type)) {
-        setError('That file type is not supported. Use JPG, PNG or WEBP.');
+        setError(t('up.badType'));
         return;
       }
       if (candidate.size > MAX_BYTES) {
-        setError(`That image is ${(candidate.size / 1048576).toFixed(1)} MB. The limit is 8 MB.`);
+        setError(t('up.tooBig', { size: num((candidate.size / 1048576).toFixed(1)) }));
         return;
       }
       setError('');
       onChange(candidate);
     },
-    [onChange]
+    [onChange, t, num]
   );
 
   const handleDrop = (event) => {
@@ -69,7 +71,7 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
             className="btn-secondary flex-1"
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            Replace image
+            {t('up.replace')}
           </button>
           <button
             type="button"
@@ -79,7 +81,7 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
             aria-label="Remove selected image"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-            Remove
+            {t('up.remove')}
           </button>
         </div>
 
@@ -100,7 +102,7 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
       <div
         role="button"
         tabIndex={0}
-        aria-label="Upload a road image"
+        aria-label={t('up.title')}
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => {
           if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
@@ -123,10 +125,10 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
         <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient text-white shadow-glow">
           <ImagePlus className="h-7 w-7" aria-hidden="true" />
         </span>
-        <p className="font-display text-base font-semibold text-ink">Upload road image</p>
-        <p className="mt-1 text-sm text-ink-muted">Drag and drop, or browse your device</p>
+        <p className="font-display text-base font-semibold text-ink">{t('up.title')}</p>
+        <p className="mt-1 text-sm text-ink-muted">{t('up.sub')}</p>
         <p className="mt-4 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-          JPG · PNG · WEBP · up to 8 MB
+          {t('up.formats')}
         </p>
       </div>
 
@@ -134,11 +136,11 @@ export default function ImageUploader({ file, onChange, disabled = false }) {
       <div className="grid grid-cols-2 gap-2 sm:hidden">
         <button type="button" onClick={() => cameraRef.current?.click()} className="btn-secondary">
           <Camera className="h-4 w-4" aria-hidden="true" />
-          Take photo
+          {t('up.take')}
         </button>
         <button type="button" onClick={() => inputRef.current?.click()} className="btn-secondary">
           <Upload className="h-4 w-4" aria-hidden="true" />
-          Choose file
+          {t('up.choose')}
         </button>
       </div>
 

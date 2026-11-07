@@ -11,10 +11,12 @@ import {
   nearestDivision,
 } from '../utils/bangladesh';
 import { formatCoords } from '../utils/format';
+import { useLang } from '../i18n';
+import BangladeshMask from './BangladeshMask';
 
 const pinIcon = L.divIcon({
   className: 'drishti-marker',
-  html: `<span style="display:block;width:20px;height:20px;border-radius:9999px;background:#4c1d95;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></span>`,
+  html: `<span style="display:block;width:20px;height:20px;border-radius:9999px;background:#006a4e;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></span>`,
   iconSize: [20, 20],
   iconAnchor: [10, 10],
 });
@@ -42,6 +44,7 @@ function Recenter({ position }) {
  * Everything is constrained to Bangladesh, which is the platform's coverage area.
  */
 export default function LocationPicker({ value, onChange, disabled = false }) {
+  const { t } = useLang();
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -49,12 +52,12 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
 
   const set = (lat, lng, source) => {
     onChange({ latitude: lat, longitude: lng, district: nearestDivision(lat, lng) });
-    setMessage(source === 'gps' ? 'Location captured from your device GPS.' : '');
+    setMessage(source === 'gps' ? t('loc.gps') : '');
   };
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      setMessage('This browser cannot share a location. Tap the map instead.');
+      setMessage(t('loc.noGeo'));
       return;
     }
     setLocating(true);
@@ -63,7 +66,7 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
       ({ coords }) => {
         setLocating(false);
         if (!isInsideBangladesh(coords.latitude, coords.longitude)) {
-          setMessage('You appear to be outside Bangladesh. DRISHTI AI covers Bangladeshi roads only — pick the spot on the map.');
+          setMessage(t('loc.outside'));
           return;
         }
         set(coords.latitude, coords.longitude, 'gps');
@@ -71,11 +74,11 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
       (err) => {
         setLocating(false);
         const reasons = {
-          1: 'Location permission was declined. Tap the map to place the hazard instead.',
-          2: 'Your location is unavailable right now. Tap the map instead.',
-          3: 'Finding your location took too long. Tap the map instead.',
+          1: t('loc.denied'),
+          2: t('loc.unavailable'),
+          3: t('loc.timeout'),
         };
-        setMessage(reasons[err.code] || 'Could not read your location. Tap the map instead.');
+        setMessage(reasons[err.code] || t('loc.failed'));
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
@@ -95,7 +98,7 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
           ) : (
             <Crosshair className="h-4 w-4" aria-hidden="true" />
           )}
-          {locating ? 'Finding you…' : 'Use my location'}
+          {locating ? t('loc.finding') : t('loc.use')}
         </button>
 
         <label className="sr-only" htmlFor="division-jump">
@@ -111,7 +114,7 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
             if (division) set(division.lat, division.lng, 'division');
           }}
         >
-          <option value="">Jump to division…</option>
+          <option value="">{t('loc.jump')}</option>
           {DIVISIONS.map((d) => (
             <option key={d.name} value={d.name}>
               {d.name}
@@ -133,6 +136,7 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
+          <BangladeshMask basemap="light" />
           <ClickCapture onPick={(lat, lng) => set(lat, lng, 'map')} />
           <Recenter position={position} />
           {position && <Marker position={position} icon={pinIcon} />}
@@ -148,12 +152,12 @@ export default function LocationPicker({ value, onChange, disabled = false }) {
               {value.district && <span className="text-ink-muted">· {value.district}</span>}
             </>
           ) : (
-            'No location set yet — use GPS or tap the map'
+            t('loc.none')
           )}
         </span>
         {position && (
           <button type="button" className="btn-ghost text-xs" onClick={() => onChange({})} disabled={disabled}>
-            Clear
+            {t('loc.clear')}
           </button>
         )}
       </div>

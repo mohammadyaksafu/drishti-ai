@@ -151,7 +151,7 @@ export default function ReportDetails() {
       {/* ------------------------------------------------ in progress */}
       {isProcessing && !timedOut && (
         <div className="mx-auto max-w-2xl">
-          <LoadingAnalysis status={report.status} elapsedMs={elapsedMs} job={job} />
+          <LoadingAnalysis status={report.status} elapsedMs={elapsedMs} job={job} imageUrl={report.imageUrl} />
         </div>
       )}
 
@@ -406,6 +406,10 @@ export default function ReportDetails() {
                     fitToMarkers={false}
                     scrollWheelZoom={false}
                     showSeverityRadius={false}
+                    showDetails={false}
+                    showLegend={false}
+                    showControls={false}
+                    initialStyle="light"
                   />
                 </div>
               </div>
