@@ -70,7 +70,8 @@ class Settings:
 
     @property
     def model_file_exists(self) -> bool:
-        return Path(self.MODEL_PATH).is_file()
+        paths = [p.strip() for p in self.MODEL_PATH.split(",") if p.strip()]
+        return bool(paths) and all(Path(p).is_file() for p in paths)
     @property
     def on_cpu(self) -> bool:
         return str(self.DEVICE).lower() in {"cpu", ""}

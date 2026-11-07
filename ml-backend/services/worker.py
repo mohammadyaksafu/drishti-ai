@@ -62,7 +62,11 @@ def line(char: str = "=", width: int = 52) -> str:
 
 def banner(detector, mongo_ok: bool) -> None:
     info = detector.info()
-    model_line = "YOLO · " + os.path.basename(info["modelPath"]) if info["mode"] == "yolo" else "MOCK inference engine"
+    model_line = (
+        f"{info['mode'].upper()} · " + os.path.basename(info["modelPath"])
+        if info["mode"] in ("yolo", "onnx")
+        else "MOCK inference engine"
+    )
     print()
     print(f"{MAGENTA}{line()}{RESET}")
     print(f"{MAGENTA}{BOLD}       DRISHTI AI  ·  LOCAL ML WORKER{RESET}")
