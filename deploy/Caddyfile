@@ -1,13 +1,21 @@
-# DRISHTI AI — Caddy site config (used on servers where nginx is not installed).
-# Serves the built React app and proxies /api to the Node API, so the frontend
-# talks to the API on the same origin. Run by deploy/setup-vps.sh in a
+# DRISHTI AI — Caddy site config.
+# Serves the built React app over HTTPS and proxies /api to the Node API, so the
+# frontend talks to the API on the same origin. Run by deploy/setup-vps.sh in a
 # caddy:2-alpine container on the host network.
+#
+# HTTPS matters beyond the padlock: browsers only share the device location on
+# secure origins, and reporting depends on it.
+#
+# DRISHTI_DOMAIN defaults to the sslip.io name for the VPS IP, which resolves
+# without any DNS setup. Port 80 on this host belongs to another service, so
+# certificates are issued with the TLS-ALPN challenge on 443.
 {
 	admin off
-	auto_https off
+	# Port 80 is not ours, so don't try to open the automatic redirect listener.
+	auto_https disable_redirects
 }
 
-:{$DRISHTI_PORT:8090} {
+(drishti_app) {
 	encode gzip
 
 	request_body {
@@ -28,4 +36,19 @@
 		try_files {path} /index.html
 		file_server
 	}
+}
+
+{$DRISHTI_DOMAIN:165-99-219-251.sslip.io} {
+	tls {
+		issuer acme {
+			disable_http_challenge
+		}
+	}
+	header Strict-Transport-Security "max-age=31536000"
+	import drishti_app
+}
+
+# The old plain-HTTP address keeps working by sending visitors to HTTPS.
+http://:{$DRISHTI_PORT:8090} {
+	redir https://{$DRISHTI_DOMAIN:165-99-219-251.sslip.io}{uri} permanent
 }

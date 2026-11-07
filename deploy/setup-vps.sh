@@ -4,15 +4,20 @@
 #
 #   sudo bash deploy/setup-vps.sh [port]        # default port 8090
 #
+#   DRISHTI_DOMAIN=roads.example.bd sudo bash deploy/setup-vps.sh
+#
 # The API runs under PM2 on 127.0.0.1:5000; a caddy:2-alpine container on the
-# host network serves the built frontend on <port> and proxies /api to the API.
-# No system web server is installed, so other sites on the box are untouched.
+# host network serves the built frontend over HTTPS on 443 for DRISHTI_DOMAIN
+# (default: the sslip.io name for the server IP), proxies /api to the API, and
+# redirects http://<ip>:<port> there. Certificates persist in the
+# drishti_caddy_data volume.
 #
 # Expects /var/www/drishti-ai/backend/.env to exist (copy backend/.env.example
 # and fill it in). Re-running it is safe: it reinstalls deps, rebuilds and reloads.
 set -euo pipefail
 
 PORT="${1:-8090}"
+DOMAIN="${DRISHTI_DOMAIN:-165-99-219-251.sslip.io}"
 APP_DIR=/var/www/drishti-ai
 SRC_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -38,8 +43,8 @@ if [ ! -f "$APP_DIR/backend/.env" ]; then
 fi
 # Browsers send an Origin header on POSTs even to the same origin, and the API
 # rejects unknown origins in production — so CLIENT_URL must name this site.
-grep -q "^CLIENT_URL=.*:$PORT" "$APP_DIR/backend/.env" ||
-  echo "!! Warning: CLIENT_URL in backend/.env should include http://<server>:$PORT"
+grep -q "^CLIENT_URL=.*https://$DOMAIN" "$APP_DIR/backend/.env" ||
+  echo "!! Warning: CLIENT_URL in backend/.env should include https://$DOMAIN"
 
 echo "==> Backend dependencies"
 cd "$APP_DIR/backend"
@@ -54,17 +59,25 @@ echo "==> API (PM2)"
 pm2 startOrReload "$APP_DIR/deploy/ecosystem.config.js" --update-env
 pm2 save
 
-echo "==> Web (Caddy on :$PORT)"
+echo "==> Web (Caddy: https://$DOMAIN, redirect from :$PORT)"
 docker rm -f drishti-web >/dev/null 2>&1 || true
 docker run -d --name drishti-web --restart unless-stopped --network host \
-  -e DRISHTI_PORT="$PORT" \
+  -e DRISHTI_PORT="$PORT" -e DRISHTI_DOMAIN="$DOMAIN" \
   -v "$APP_DIR/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
   -v "$APP_DIR/frontend/dist:/srv/drishti:ro" \
+  -v drishti_caddy_data:/data \
   caddy:2-alpine >/dev/null
-command -v ufw >/dev/null && ufw allow "$PORT/tcp" comment "DRISHTI AI" >/dev/null || true
+if command -v ufw >/dev/null; then
+  ufw allow "$PORT/tcp" comment "DRISHTI AI redirect" >/dev/null || true
+  ufw allow 443 comment "DRISHTI AI https" >/dev/null || true
+fi
 
-echo "==> Health check"
-sleep 3
-curl -s -o /dev/null -w "web  %{http_code}\n" "http://127.0.0.1:$PORT/"
-curl -s -w "\n" "http://127.0.0.1:$PORT/api/health" || true
+echo "==> Health check (the first certificate can take a few seconds)"
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  curl -s -o /dev/null --max-time 5 "https://$DOMAIN/" && break
+  sleep 3
+done
+curl -s -o /dev/null -w "https %{http_code}\n" "https://$DOMAIN/" || echo "https not ready yet"
+curl -s -w "\n" "https://$DOMAIN/api/health" || true
+curl -s -o /dev/null -w "redirect from :$PORT -> %{http_code} %{redirect_url}\n" "http://127.0.0.1:$PORT/" || true
 echo "Done."
