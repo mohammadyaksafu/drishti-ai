@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Camera,
@@ -17,10 +17,19 @@ import {
   Satellite,
   ShieldCheck,
   MapPin,
+  ChevronDown,
+  PlayCircle,
 } from 'lucide-react';
 import HazardCard from '../components/HazardCard';
+import { CountUp, Reveal, spotlightHandler } from '../components/Motion';
 import { dashboardApi } from '../services/api';
 import { HAZARD_TYPES } from '../utils/severity';
+import { useLang } from '../i18n';
+import { FlagBD } from '../components/Footer';
+import ProcessVideo from '../components/ProcessVideo';
+
+// three.js is only downloaded for the home page, after first paint.
+const HeroScene = lazy(() => import('../components/HeroScene'));
 
 const HAZARD_ICONS = {
   pothole: CircleDot,
@@ -37,45 +46,18 @@ const HAZARD_ICONS = {
  * repair on a municipal work order.
  */
 const PIPELINE = [
-  { stage: 'Capture', icon: Camera, detail: 'A citizen photographs a road defect and shares their GPS position.' },
-  { stage: 'Detect', icon: ScanLine, detail: 'A YOLO detector locates every hazard in the frame and classifies it.' },
-  { stage: 'Assess', icon: Gauge, detail: 'A severity engine scores how dangerous each defect actually is, 0–100.' },
-  { stage: 'Map', icon: MapPin, detail: 'The hazard lands on a live national map as a geospatial data point.' },
-  { stage: 'Prioritise', icon: ShieldCheck, detail: 'Authorities work the queue worst-first instead of complaint-first.' },
+  { key: 'capture', icon: Camera },
+  { key: 'detect', icon: ScanLine },
+  { key: 'assess', icon: Gauge },
+  { key: 'map', icon: MapPin },
+  { key: 'prioritise', icon: ShieldCheck },
 ];
 
-const REASONS = [
-  {
-    icon: Users,
-    title: 'Crowdsourced coverage',
-    body: 'Road inspection today is manual, periodic and thin. Thousands of phones already travel every road in the country daily.',
-  },
-  {
-    icon: ScanLine,
-    title: 'AI detection',
-    body: 'A single trained detector reads six hazard classes from an ordinary photo, with no special hardware on the citizen side.',
-  },
-  {
-    icon: Gauge,
-    title: 'Severity, not just confidence',
-    body: 'A weighted engine scores defect size, hazard class, detector confidence and road context — because a confident crack is still a minor crack.',
-  },
-  {
-    icon: Satellite,
-    title: 'Geospatial intelligence',
-    body: 'Every report is a coordinate. Clusters expose the road segments that are failing, not just the individual complaints.',
-  },
-  {
-    icon: Building2,
-    title: 'One authority view',
-    body: 'City corporations see the whole picture: distribution by severity, by hazard type, by district, and over time.',
-  },
-  {
-    icon: Layers,
-    title: 'Built to scale',
-    body: 'Asynchronous job architecture. Adding dashcams, buses or CCTV as sources means adding producers, not rewriting the pipeline.',
-  },
-];
+const REASONS = [Users, ScanLine, Gauge, Satellite, Building2, Layers].map((icon, i) => ({
+  icon,
+  title: `why.${i + 1}.t`,
+  body: `why.${i + 1}.b`,
+}));
 
 /**
  * An illustrative detection frame: a stylised road with bounding boxes and a
@@ -163,15 +145,87 @@ function DetectionPreview() {
 
 function SectionHeading({ eyebrow, title, children, center = false }) {
   return (
-    <div className={center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
+    <Reveal className={center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl'}>
       <p className="eyebrow">{eyebrow}</p>
       <h2 className={`section-title ${center ? 'mx-auto' : ''}`}>{title}</h2>
       {children && <p className="mt-4 text-lg leading-relaxed text-ink-soft">{children}</p>}
+    </Reveal>
+  );
+}
+
+
+const HEADLINE = [{ key: 'hero.line1' }, { key: 'hero.line2' }, { key: 'hero.line3', gradient: true }];
+
+/** The five pipeline stages, auto-advancing so the story plays itself. */
+function Pipeline() {
+  const { t } = useLang();
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return undefined;
+    const id = setInterval(() => setActive((i) => (i + 1) % PIPELINE.length), 2400);
+    return () => clearInterval(id);
+  }, [paused]);
+
+  return (
+    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <ol className="relative mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        {/* track + animated fill */}
+        <span
+          className="absolute left-[10%] right-[10%] top-9 hidden h-[3px] rounded-full bg-brand-100 lg:block"
+          aria-hidden="true"
+        >
+          <span
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-500 to-magenta-500 transition-[width] duration-700 ease-out"
+            style={{ width: `${(active / (PIPELINE.length - 1)) * 100}%` }}
+          />
+        </span>
+        {PIPELINE.map((step, index) => {
+          const done = index <= active;
+          const isActive = index === active;
+          return (
+            <Reveal as="li" key={step.key} delay={index * 110} className="relative">
+              <button
+                type="button"
+                onClick={() => setActive(index)}
+                className="group flex w-full flex-col items-center rounded-2xl p-2 text-center"
+                aria-current={isActive ? 'step' : undefined}
+              >
+                <span
+                  className={`relative z-10 grid h-14 w-14 place-items-center rounded-2xl transition-all duration-500 ${
+                    done
+                      ? 'bg-brand-gradient text-white shadow-glow'
+                      : 'bg-white text-brand-700 ring-1 ring-brand-100'
+                  } ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}
+                >
+                  {isActive && (
+                    <span className="absolute inset-0 animate-pulse-ring rounded-2xl bg-brand-500/40" aria-hidden="true" />
+                  )}
+                  <step.icon className="relative h-6 w-6" aria-hidden="true" />
+                  <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white font-mono text-[10px] font-bold text-brand-800 shadow ring-1 ring-ink-line">
+                    {index + 1}
+                  </span>
+                </span>
+                <h3
+                  className={`mt-5 font-display text-lg font-bold transition-colors ${
+                    isActive ? 'text-brand-700' : 'text-ink'
+                  }`}
+                >
+                  {t(`pipe.${step.key}`)}
+                </h3>
+                <p className="mt-1.5 max-w-[16rem] text-sm leading-relaxed text-ink-muted">{t(`pipe.${step.key}.d`)}</p>
+              </button>
+            </Reveal>
+          );
+        })}
+      </ol>
     </div>
   );
 }
 
 export default function Home() {
+  const { t, num, lang } = useLang();
   const [stats, setStats] = useState(null);
   const [hazardCounts, setHazardCounts] = useState({});
 
@@ -187,95 +241,158 @@ export default function Home() {
       .catch(() => setHazardCounts({}));
   }, []);
 
+  let wordIndex = 0;
+
   return (
     <div className="-mb-24">
       {/* ---------------------------------------------------------- hero */}
-      <section className="relative overflow-hidden bg-night-950 text-white">
-        <div className="bg-grid mask-fade-b pointer-events-none absolute inset-0" aria-hidden="true" />
+      <section className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-night-950 text-white">
         <div
           className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-brand-600/25 blur-3xl"
           aria-hidden="true"
         />
+        <Suspense fallback={null}>
+          <HeroScene className="absolute inset-0" />
+        </Suspense>
+        {/* Keep the copy legible over the 3D road. */}
         <div
-          className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-magenta-500/15 blur-3xl"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-night-950 via-night-950/70 to-night-950/10"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-night-950 to-transparent"
           aria-hidden="true"
         />
 
-        <div className="container-page relative grid items-center gap-14 pb-20 pt-14 lg:grid-cols-12 lg:pb-28 lg:pt-20">
-          <div className="animate-fade-up lg:col-span-7">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-brand-200 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-magenta-400" aria-hidden="true" />
-              Road hazard intelligence · Bangladesh
+        <div className="container-page relative grid items-center gap-14 pb-24 pt-14 lg:grid-cols-12 lg:pt-20">
+          <div className="lg:col-span-7">
+            <p className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium tracking-wide text-brand-200 backdrop-blur">
+              <FlagBD className="h-3 w-5" />
+              {t('hero.badge')}
             </p>
-            <h1 className="mt-6 font-display text-[2.6rem] font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
-              See the road.
-              <br />
-              Detect the danger.
-              <br />
-              <span className="text-gradient">Fix the future.</span>
+            <h1
+              className={`mt-6 font-display text-[2.6rem] font-bold tracking-tight [perspective:600px] sm:text-6xl lg:text-7xl ${
+                lang === 'bn' ? '!leading-[1.3]' : 'leading-[1.06]'
+              }`}
+              aria-label={HEADLINE.map((line) => t(line.key)).join(' ')}
+            >
+              {HEADLINE.map((line, li) => (
+                <span key={`${lang}-${li}`} className="block" aria-hidden="true">
+                  {t(line.key).split(' ').map((word) => {
+                    const delay = 120 + wordIndex++ * 90;
+                    return (
+                      <span
+                        key={`${word}-${delay}`}
+                        className={`hero-word mr-[0.25em] ${line.gradient ? 'text-gradient' : ''}`}
+                        style={{ animationDelay: `${delay}ms` }}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </span>
+              ))}
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/65">
-              DRISHTI AI turns ordinary smartphone road photos into geospatial road-condition data. It
-              detects hazards, scores how severe they are, and gives authorities a ranked repair queue
-              instead of an inbox of complaints.
+            <p
+              className="mt-3 animate-fade-up font-bangla text-2xl text-magenta-300 sm:text-3xl"
+              style={{ animationDelay: '750ms' }}
+            >
+              {t('hero.motto')}
+            </p>
+            <p
+              className="mt-5 max-w-xl animate-fade-up text-lg leading-relaxed text-white/70"
+              style={{ animationDelay: '900ms' }}
+            >
+              {t('hero.body')}
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link to="/report" className="btn-primary px-6 py-3.5 text-base">
+            <div className="mt-9 flex animate-fade-up flex-wrap gap-3" style={{ animationDelay: '1050ms' }}>
+              <Link to="/report" className="btn-primary btn-glow px-6 py-3.5 text-base">
                 <Camera className="h-5 w-5" aria-hidden="true" />
-                Report a road hazard
+                {t('hero.ctaReport')}
               </Link>
               <Link to="/map" className="btn-outline-light px-6 py-3.5 text-base">
                 <MapIcon className="h-5 w-5" aria-hidden="true" />
-                Explore road map
+                {t('hero.ctaMap')}
               </Link>
+              <a
+                href="#watch"
+                onClick={() => setTimeout(() => window.dispatchEvent(new Event('drishti:play-video')), 650)}
+                className="btn px-4 py-3.5 text-base text-white/80 hover:bg-white/5 hover:text-white"
+              >
+                <PlayCircle className="h-5 w-5 text-magenta-400" aria-hidden="true" />
+                {t('vid.watch')}
+              </a>
             </div>
 
+            <ul
+              className="mt-6 flex animate-fade-up flex-wrap gap-x-5 gap-y-2 text-sm text-white/60"
+              style={{ animationDelay: '1200ms' }}
+            >
+              {[t('hero.point1'), t('hero.point2'), t('hero.point3')].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-sev-low" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
             {stats && stats.totals.total > 0 && (
-              <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-6">
+              <dl className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-6">
                 {[
-                  ['Reports', stats.totals.total],
-                  ['Critical hazards', stats.severity.critical],
-                  ['Resolved', stats.totals.resolved],
+                  [t('hero.statReports'), stats.totals.total],
+                  [t('hero.statCritical'), stats.severity.critical],
+                  [t('hero.statResolved'), stats.totals.resolved],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-xs font-medium text-white/50">{label}</dt>
-                    <dd className="mt-1 font-display text-3xl font-bold tabular-nums text-white">{value}</dd>
+                    <dd className="mt-1 font-display text-3xl font-bold tabular-nums text-white">
+                      <CountUp value={value} format={num} />
+                    </dd>
                   </div>
                 ))}
               </dl>
             )}
           </div>
 
-          <div className="lg:col-span-5">
+          <div className="animate-fade-up lg:col-span-5" style={{ animationDelay: '600ms' }}>
             <DetectionPreview />
           </div>
         </div>
+
+        <a
+          href="#how-it-works"
+          className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-xs text-white/50 transition-colors hover:text-white sm:flex"
+        >
+          {t('hero.scroll')}
+          <ChevronDown className="h-4 w-4 animate-bounce" aria-hidden="true" />
+        </a>
       </section>
 
       {/* --------------------------------------------------- how it works */}
-      <section className="relative py-20 sm:py-24">
+      <section id="how-it-works" className="relative scroll-mt-16 py-20 sm:py-24">
         <div className="container-page">
-          <SectionHeading eyebrow="How it works" title="From a photo on a phone to a prioritised repair" center />
+          <SectionHeading eyebrow={t('how.eyebrow')} title={t('how.title')} center />
+          <Pipeline />
+          <Reveal className="mt-12 flex justify-center">
+            <Link to="/report" className="btn-primary group px-6 py-3">
+              <Camera className="h-4 w-4" aria-hidden="true" />
+              {t('how.cta')}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </Link>
+          </Reveal>
+        </div>
+      </section>
 
-          <ol className="relative mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-            <span
-              className="absolute left-[10%] right-[10%] top-7 hidden h-px bg-gradient-to-r from-brand-200 via-brand-400 to-brand-200 lg:block"
-              aria-hidden="true"
-            />
-            {PIPELINE.map((step, index) => (
-              <li key={step.stage} className="relative flex flex-col items-center text-center">
-                <span className="relative z-10 grid h-14 w-14 place-items-center rounded-2xl bg-brand-gradient text-white shadow-glow">
-                  <step.icon className="h-6 w-6" aria-hidden="true" />
-                  <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-white font-mono text-[10px] font-bold text-brand-800 shadow ring-1 ring-ink-line">
-                    {index + 1}
-                  </span>
-                </span>
-                <h3 className="mt-5 font-display text-lg font-bold text-ink">{step.stage}</h3>
-                <p className="mt-1.5 max-w-[16rem] text-sm leading-relaxed text-ink-muted">{step.detail}</p>
-              </li>
-            ))}
-          </ol>
+      {/* --------------------------------------------- the process, animated */}
+      <section id="watch" className="scroll-mt-20 border-t border-ink-line bg-white py-20 sm:py-24">
+        <div className="container-page">
+          <SectionHeading eyebrow={t('vid.eyebrow')} title={t('vid.title')} center>
+            {t('vid.body')}
+          </SectionHeading>
+          <Reveal className="mx-auto mt-12 max-w-5xl">
+            <ProcessVideo />
+          </Reveal>
         </div>
       </section>
 
@@ -283,19 +400,22 @@ export default function Home() {
       <section className="border-y border-ink-line bg-white py-20 sm:py-24">
         <div className="container-page">
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <SectionHeading eyebrow="Supported hazards" title="Six classes the detector reads today">
-              Each class carries its own intrinsic risk weight in the severity engine, so an open manhole
-              and a hairline crack are never treated as the same problem.
+            <SectionHeading eyebrow={t('haz.eyebrow')} title={t('haz.title')}>
+              {t('haz.body')}
             </SectionHeading>
-            <Link to="/reports" className="btn-secondary">
-              Browse reports
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            <Reveal>
+              <Link to="/reports" className="btn-secondary group">
+                {t('haz.browse')}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+            </Reveal>
           </div>
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {HAZARD_TYPES.map((type) => (
-              <HazardCard key={type} type={type} icon={HAZARD_ICONS[type]} count={hazardCounts[type] ?? null} />
+            {HAZARD_TYPES.map((type, i) => (
+              <Reveal key={type} delay={(i % 3) * 100}>
+                <HazardCard type={type} icon={HAZARD_ICONS[type]} count={hazardCounts[type] ?? null} />
+              </Reveal>
             ))}
           </div>
         </div>
@@ -304,43 +424,50 @@ export default function Home() {
       {/* ------------------------------------------------------- why drishti */}
       <section className="py-20 sm:py-24">
         <div className="container-page">
-          <SectionHeading eyebrow="Why DRISHTI AI" title="Infrastructure intelligence, not a complaint box" />
+          <SectionHeading eyebrow={t('why.eyebrow')} title={t('why.title')} />
 
-          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-ink-line bg-ink-line sm:grid-cols-2 lg:grid-cols-3">
+          <Reveal className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-ink-line bg-ink-line sm:grid-cols-2 lg:grid-cols-3">
             {REASONS.map((reason) => (
-              <div key={reason.title} className="group bg-white p-7 transition-colors hover:bg-brand-50/40">
-                <span className="icon-tile transition-transform group-hover:scale-110">
+              <div
+                key={reason.title}
+                onMouseMove={spotlightHandler}
+                className="spotlight group bg-white p-7"
+              >
+                <span className="icon-tile transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                   <reason.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <h3 className="mt-5 font-display text-lg font-bold text-ink">{reason.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{reason.body}</p>
+                <h3 className="mt-5 font-display text-lg font-bold text-ink">{t(reason.title)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t(reason.body)}</p>
               </div>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* -------------------------------------------------------------- cta */}
       <section className="container-page pb-24">
-        <div className="relative overflow-hidden rounded-3xl bg-night-950 px-6 py-14 text-white sm:px-12">
+        <Reveal className="relative overflow-hidden rounded-3xl bg-night-950 px-6 py-14 text-white sm:px-12">
           <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden="true" />
           <div
-            className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-brand-600/40 blur-3xl"
+            className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 animate-float rounded-full bg-brand-600/40 blur-3xl"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-24 left-10 h-60 w-60 animate-float rounded-full bg-magenta-500/20 blur-3xl"
+            style={{ animationDelay: '-2.5s' }}
             aria-hidden="true"
           />
           <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
             <div>
-              <h2 className="font-display text-3xl font-bold sm:text-4xl">Found a bad stretch of road today?</h2>
-              <p className="mt-3 max-w-xl text-lg text-white/60">
-                One photo and your location is enough. The analysis comes back in under a minute.
-              </p>
+              <h2 className="font-display text-3xl font-bold sm:text-4xl">{t('cta.title')}</h2>
+              <p className="mt-3 max-w-xl text-lg text-white/60">{t('cta.body')}</p>
             </div>
-            <Link to="/report" className="btn-light shrink-0 px-6 py-3.5 text-base">
-              Report a hazard
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            <Link to="/report" className="btn-light group shrink-0 px-6 py-3.5 text-base">
+              {t('cta.button')}
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );
