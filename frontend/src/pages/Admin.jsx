@@ -384,7 +384,7 @@ function PipelineTab() {
 
       <div className="grid gap-4 sm:grid-cols-4">
         <StatCard label="Pending" value={pipeline.jobs.pending} accent="#71717a" />
-        <StatCard label="Processing" value={pipeline.jobs.processing} accent="#7c3aed" />
+        <StatCard label="Processing" value={pipeline.jobs.processing} accent="#0c8158" />
         <StatCard label="Completed" value={pipeline.jobs.completed} accent="#16a34a" />
         <StatCard label="Failed" value={pipeline.jobs.failed} accent="#dc2626" />
       </div>

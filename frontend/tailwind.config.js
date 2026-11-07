@@ -4,28 +4,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Brand: a deep violet that reads as "infrastructure intelligence"
-        // rather than consumer app, with a magenta used only for emphasis.
+        // Brand: the bottle green of the Bangladesh flag (#006a4e at 700),
+        // with the flag's red sun (kept under the `magenta` key) for emphasis.
         brand: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
+          50: '#eefbf4',
+          100: '#d5f5e3',
+          200: '#aeeacb',
+          300: '#78d8ac',
+          400: '#3fbe88',
+          500: '#1ba06d',
+          600: '#0c8158',
+          700: '#006a4e',
+          800: '#05543f',
+          900: '#064535',
+          950: '#02271d',
         },
-        magenta: { 400: '#e879f9', 500: '#d946ef', 600: '#c026d3' },
+        magenta: { 300: '#ff8a98', 400: '#ff5a6e', 500: '#f42a41', 600: '#d41a30' },
         // The dark surfaces used for the hero, footer and page headers.
         night: {
-          700: '#2a2d55',
-          800: '#1a1c3a',
-          900: '#11122b',
-          950: '#0a0b1d',
+          700: '#123a2e',
+          800: '#0b2a21',
+          900: '#071d17',
+          950: '#04120e',
         },
         // Severity palette. These four are used everywhere: badges, markers,
         // charts, the annotated image, so the same colour always means the same thing.
@@ -36,29 +36,32 @@ export default {
           critical: '#dc2626',
         },
         ink: {
-          DEFAULT: '#14152b',
-          soft: '#3d4060',
-          muted: '#6b6f8a',
-          line: '#e4e5ef',
+          DEFAULT: '#0f1f19',
+          soft: '#3a4d45',
+          muted: '#66786f',
+          line: '#e1e8e4',
         },
-        canvas: '#f6f6fb',
+        canvas: '#f4f8f6',
       },
       fontFamily: {
-        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        // Latin glyphs come from the first font, Bangla glyphs fall through to
+        // the Bengali face, so mixed text renders well in either language.
+        display: ['"Space Grotesk"', '"Baloo Da 2"', 'system-ui', 'sans-serif'],
+        sans: ['Inter', '"Hind Siliguri"', 'system-ui', '-apple-system', 'sans-serif'],
+        bangla: ['Galada', '"Baloo Da 2"', 'cursive'],
+        mono: ['"JetBrains Mono"', '"Hind Siliguri"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         card: '0 1px 2px rgba(20,21,43,0.04), 0 2px 12px rgba(20,21,43,0.04)',
         lift: '0 2px 4px rgba(20,21,43,0.04), 0 16px 40px -8px rgba(20,21,43,0.14)',
-        glow: '0 0 0 1px rgba(139,92,246,0.25), 0 12px 40px -8px rgba(124,58,237,0.45)',
+        glow: '0 0 0 1px rgba(27,160,109,0.3), 0 12px 40px -8px rgba(0,106,78,0.55)',
         'btn-primary':
-          'inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(46,16,101,0.3), 0 6px 16px -6px rgba(76,29,149,0.55)',
+          'inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(2,39,29,0.35), 0 6px 16px -6px rgba(0,106,78,0.6)',
       },
       borderRadius: { xl2: '1.25rem' },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #6d28d9 0%, #4c1d95 55%, #2e1065 100%)',
-        'accent-gradient': 'linear-gradient(90deg, #a78bfa 0%, #e879f9 100%)',
+        'brand-gradient': 'linear-gradient(135deg, #0c8158 0%, #006a4e 55%, #064535 100%)',
+        'accent-gradient': 'linear-gradient(90deg, #5ee0a5 0%, #ff5a6e 100%)',
       },
       keyframes: {
         'fade-up': {

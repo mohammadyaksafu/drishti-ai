@@ -1,4 +1,4 @@
-export default function StatCard({ label, value, hint, icon: Icon, accent = '#4c1d95', loading = false }) {
+export default function StatCard({ label, value, hint, icon: Icon, accent = '#006a4e', loading = false }) {
   return (
     <div className="card relative overflow-hidden p-5">
       <span
