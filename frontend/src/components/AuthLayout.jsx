@@ -1,13 +1,11 @@
 import { CheckCircle2 } from 'lucide-react';
+import { useLang } from '../i18n';
 
-const POINTS = [
-  'Submit a road photo with GPS in under a minute',
-  'Watch the AI detect and score the hazard live',
-  'Track your report until it is marked resolved',
-];
+const POINTS = ['auth.side.p1', 'auth.side.p2', 'auth.side.p3'];
 
 /** Split-screen shell for sign-in and registration. */
 export default function AuthLayout({ eyebrow, title, description, children, footer }) {
+  const { t } = useLang();
   return (
     <div className="container-page py-10 sm:py-16">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-ink-line bg-white shadow-lift lg:grid-cols-2">
@@ -22,22 +20,22 @@ export default function AuthLayout({ eyebrow, title, description, children, foot
             aria-hidden="true"
           />
           <div className="relative flex h-full flex-col">
-            <p className="eyebrow-light">DRISHTI AI</p>
+            <p className="font-bangla text-3xl text-brand-200">দৃষ্টি</p>
             <h2 className="mt-4 font-display text-3xl font-bold leading-tight">
-              Every photo makes the
+              {t('auth.side.title1')}
               <br />
-              <span className="text-gradient">road map sharper.</span>
+              <span className="text-gradient">{t('auth.side.title2')}</span>
             </h2>
             <ul className="mt-8 space-y-4">
               {POINTS.map((point) => (
                 <li key={point} className="flex items-start gap-3 text-sm text-white/70">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-300" aria-hidden="true" />
-                  {point}
+                  {t(point)}
                 </li>
               ))}
             </ul>
             <p className="mt-auto pt-10 font-mono text-[11px] uppercase tracking-widest text-white/40">
-              Coverage · Bangladesh
+              {t('auth.side.coverage')}
             </p>
           </div>
         </aside>

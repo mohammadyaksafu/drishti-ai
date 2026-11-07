@@ -1,16 +1,81 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, Loader2, Send } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Camera,
+  Check,
+  FileText,
+  Loader2,
+  MapPin,
+  Send,
+} from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import ImageUploader from '../components/ImageUploader';
-import LocationPicker from '../components/LocationPicker';
+import AutoLocation from '../components/AutoLocation';
 import { reportsApi } from '../services/api';
 import { isInsideBangladesh } from '../utils/bangladesh';
+import { formatCoords } from '../utils/format';
+import { useLang } from '../i18n';
+
+const STEPS = [
+  { key: 'photo', label: 'rep.s1', icon: Camera, hint: 'rep.s1.h' },
+  { key: 'review', label: 'rep.s3', icon: FileText, hint: 'rep.s3.h' },
+];
+
+/** Horizontal stepper with an animated progress track. */
+function Stepper({ step, canReach, onJump }) {
+  const { t, num } = useLang();
+  return (
+    <ol className="relative grid grid-cols-2 gap-2">
+      <span className="absolute left-1/4 right-1/4 top-5 h-[3px] rounded-full bg-ink-line" aria-hidden="true">
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-600 to-magenta-500 transition-[width] duration-500 ease-out"
+          style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
+        />
+      </span>
+      {STEPS.map((s, i) => {
+        const done = i < step;
+        const active = i === step;
+        const reachable = canReach(i);
+        return (
+          <li key={s.key} className="relative flex flex-col items-center text-center">
+            <button
+              type="button"
+              disabled={!reachable}
+              onClick={() => onJump(i)}
+              aria-current={active ? 'step' : undefined}
+              aria-label={`${num(i + 1)}: ${t(s.label)}`}
+              className={`relative z-10 grid h-10 w-10 place-items-center rounded-full text-sm font-bold transition-all duration-300 disabled:cursor-not-allowed ${
+                done
+                  ? 'bg-brand-gradient text-white shadow-btn-primary'
+                  : active
+                  ? 'scale-110 bg-white text-brand-700 ring-2 ring-brand-600 shadow-glow'
+                  : 'bg-white text-ink-muted ring-1 ring-ink-line'
+              }`}
+            >
+              {done ? <Check className="h-5 w-5" aria-hidden="true" /> : <s.icon className="h-[18px] w-[18px]" aria-hidden="true" />}
+            </button>
+            <span className={`mt-2 text-sm font-semibold ${active || done ? 'text-ink' : 'text-ink-muted'}`}>
+              {t(s.label)}
+            </span>
+            <span className="hidden text-xs text-ink-muted sm:block">{t(s.hint)}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function ReportHazard() {
   const navigate = useNavigate();
+  const { t, num } = useLang();
 
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState('next');
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState('');
   const [location, setLocation] = useState({});
   const [locationName, setLocationName] = useState('');
   const [description, setDescription] = useState('');
@@ -20,16 +85,33 @@ export default function ReportHazard() {
   const [error, setError] = useState('');
 
   const locationReady = isInsideBangladesh(location.latitude, location.longitude);
-  const canSubmit = Boolean(file) && locationReady && !submitting;
+  const stepValid = [Boolean(file) && locationReady, true];
+  const canReach = (i) => i === 0 || stepValid.slice(0, i).every(Boolean);
+
+  useEffect(() => {
+    if (!file) return setPreview('');
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const go = (target) => {
+    if (target === step || !canReach(target) || submitting) return;
+    setDir(target > step ? 'next' : 'back');
+    setError('');
+    setStep(target);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError('');
-
-    if (!file) return setError('Add a photo of the road before submitting.');
-    if (!locationReady) {
-      return setError('Set a location inside Bangladesh using GPS or by tapping the map.');
+    if (step < STEPS.length - 1) {
+      if (stepValid[step]) go(step + 1);
+      return;
     }
+    setError('');
+    if (!file) return setError(t('rep.err.photo'));
+    if (!locationReady) return setError(t('rep.err.loc'));
 
     const payload = new FormData();
     payload.append('image', file);
@@ -48,104 +130,133 @@ export default function ReportHazard() {
       });
       navigate(`/report/${report._id}`, { replace: true });
     } catch (err) {
-      setError(err.message || 'Upload failed. Please try again.');
+      setError(err.message || t('rep.err.upload'));
       setSubmitting(false);
     }
   }
 
+  const nextLabel = t(['rep.next2', 'rep.submit'][step]);
+  const blockedHint = step === 0 && !stepValid[0] ? t(file ? 'rep.need2' : 'rep.need1') : '';
+
   return (
     <>
       <PageHeader
-        eyebrow="Capture"
-        title="Report a road hazard"
-        description="Take one clear photo of the defect and confirm where it is. The AI analysis usually takes 30–60 seconds and you will watch it happen on the next screen."
+        eyebrow={t('rep.eyebrow', { n: num(step + 1), total: num(STEPS.length) })}
+        title={t('rep.title')}
+        description={t('rep.desc')}
       />
-      <div className="container-page py-8 sm:py-10">
-        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-5">
-          <div className="space-y-8 lg:col-span-3">
-            <section className="card p-5 sm:p-6">
-              <h2 className="font-display text-lg font-bold text-ink">1. Road image</h2>
-              <p className="mb-4 mt-1 text-sm text-ink-muted">
-                Frame the defect so it fills a good part of the photo — the detector reads defect size as
-                part of the severity score.
-              </p>
-              <ImageUploader file={file} onChange={setFile} disabled={submitting} />
-            </section>
 
-            <section className="card p-5 sm:p-6">
-              <h2 className="font-display text-lg font-bold text-ink">2. Location</h2>
-              <p className="mb-4 mt-1 text-sm text-ink-muted">
-                Share your device GPS, or tap the exact spot on the map. Coverage is Bangladesh only.
-              </p>
-              <LocationPicker value={location} onChange={setLocation} disabled={submitting} />
-            </section>
-
-            <section className="card p-5 sm:p-6">
-              <h2 className="font-display text-lg font-bold text-ink">3. Details</h2>
-              <p className="mb-4 mt-1 text-sm text-ink-muted">Optional, but it helps the repair crew.</p>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="locationName" className="label">
-                    Road or landmark
-                  </label>
-                  <input
-                    id="locationName"
-                    type="text"
-                    className="field"
-                    placeholder="e.g. Zindabazar Point, near the pharmacy"
-                    value={locationName}
-                    maxLength={160}
-                    disabled={submitting}
-                    onChange={(e) => setLocationName(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="description" className="label">
-                    What is wrong here?
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={4}
-                    className="field resize-y"
-                    placeholder="e.g. Deep pit in the left lane, water collects here after rain and it is hidden from riders."
-                    value={description}
-                    maxLength={600}
-                    disabled={submitting}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                  <p className="mt-1 text-right font-mono text-xs text-ink-muted">
-                    {description.length}/600
-                  </p>
-                </div>
-              </div>
-            </section>
+      <div className="container-page -mt-6 pb-28 sm:pb-12">
+        <div className="mx-auto max-w-3xl">
+          <div className="card relative p-5 sm:p-6">
+            <Stepper step={step} canReach={canReach} onJump={go} />
           </div>
 
-          {/* Sticky summary rail — on mobile it simply stacks last. */}
-          <aside className="lg:col-span-2">
-            <div className="card sticky top-24 p-5 sm:p-6">
-              <h2 className="font-display text-lg font-bold text-ink">Ready to submit</h2>
+          <form onSubmit={handleSubmit} className="mt-6">
+            <div key={step} data-dir={dir} className="step-panel card p-5 sm:p-7">
+              {step === 0 && (
+                <>
+                  <h2 className="font-display text-xl font-bold text-ink">{t('rep.p1.title')}</h2>
+                  <p className="mb-5 mt-1 text-sm text-ink-muted">{t('rep.p1.body')}</p>
+                  <ImageUploader file={file} onChange={setFile} disabled={submitting} />
 
-              <ul className="mt-4 space-y-2.5 text-sm">
-                <li className="flex items-center justify-between gap-3">
-                  <span className="text-ink-soft">Photo</span>
-                  <span className={file ? 'font-semibold text-sev-low' : 'text-ink-muted'}>
-                    {file ? 'Added' : 'Required'}
-                  </span>
-                </li>
-                <li className="flex items-center justify-between gap-3">
-                  <span className="text-ink-soft">Location</span>
-                  <span className={locationReady ? 'font-semibold text-sev-low' : 'text-ink-muted'}>
-                    {locationReady ? location.district || 'Set' : 'Required'}
-                  </span>
-                </li>
-                <li className="flex items-center justify-between gap-3">
-                  <span className="text-ink-soft">Description</span>
-                  <span className="text-ink-muted">{description ? 'Added' : 'Optional'}</span>
-                </li>
-              </ul>
+                  <h3 className="mt-7 font-display text-lg font-bold text-ink">{t('rep.p2.title')}</h3>
+                  <p className="mb-3 mt-1 text-sm text-ink-muted">{t('rep.p2.body')}</p>
+                  <AutoLocation file={file} value={location} onChange={setLocation} disabled={submitting} />
+                </>
+              )}
+
+              {step === 1 && (
+                <>
+                  <h2 className="font-display text-xl font-bold text-ink">{t('rep.p3.title')}</h2>
+                  <p className="mb-5 mt-1 text-sm text-ink-muted">{t('rep.p3.body')}</p>
+
+                  <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
+                    <button
+                      type="button"
+                      onClick={() => go(0)}
+                      className="group relative overflow-hidden rounded-xl border border-ink-line"
+                      title={t('rep.changePhoto')}
+                    >
+                      {preview && <img src={preview} alt={t('rep.yourPhoto')} className="h-40 w-full object-cover sm:h-full" />}
+                      <span className="absolute inset-0 grid place-items-center bg-night-950/60 text-sm font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        {t('rep.changePhoto')}
+                      </span>
+                    </button>
+                    <div className="space-y-3">
+                      <div className="flex w-full items-center gap-3 rounded-xl border border-ink-line bg-canvas p-3 text-left">
+                        <span className="icon-tile">
+                          <MapPin className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold text-ink">{location.district || t('rep.locationSet')}</span>
+                          <span className="block font-mono text-xs text-ink-muted">
+                            {formatCoords(location.latitude, location.longitude)}
+                          </span>
+                        </span>
+                        <span className="ml-auto rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                          {location.source === 'photo' ? t('loc.auto.fromPhoto') : t('loc.auto.fromGps')}
+                        </span>
+                      </div>
+
+                      <div>
+                        <label htmlFor="locationName" className="label">
+                          {t('rep.landmark')}
+                        </label>
+                        <input
+                          id="locationName"
+                          type="text"
+                          className="field"
+                          placeholder={t('rep.landmark.ph')}
+                          value={locationName}
+                          maxLength={160}
+                          disabled={submitting}
+                          onChange={(e) => setLocationName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label htmlFor="description" className="label">
+                      {t('rep.what')}
+                    </label>
+                    <textarea
+                      id="description"
+                      rows={3}
+                      className="field resize-y"
+                      placeholder={t('rep.what.ph')}
+                      value={description}
+                      maxLength={600}
+                      disabled={submitting}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                    <p className="mt-1 text-right font-mono text-xs text-ink-muted">{num(description.length)}/{num(600)}</p>
+                  </div>
+
+                  {submitting && (
+                    <div className="mt-2 rounded-xl border border-brand-100 bg-brand-50/60 p-4">
+                      <div className="flex justify-between text-sm font-medium text-brand-900">
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          {t('rep.uploading')}
+                        </span>
+                        <span className="font-mono">{num(progress)}%</span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-brand-600 to-magenta-500 transition-[width] duration-200"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="mt-4 text-xs leading-relaxed text-ink-muted">
+                    {t('rep.privacy')}
+                  </p>
+                </>
+              )}
 
               {error && (
                 <p
@@ -156,43 +267,50 @@ export default function ReportHazard() {
                   {error}
                 </p>
               )}
-
-              {submitting && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-xs text-ink-muted">
-                    <span>Uploading image</span>
-                    <span className="font-mono">{progress}%</span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100">
-                    <div
-                      className="h-full rounded-full bg-brand-700 transition-[width] duration-200"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <button type="submit" disabled={!canSubmit} className="btn-primary mt-5 w-full py-3">
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                    Submitting…
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" aria-hidden="true" />
-                    Submit for analysis
-                  </>
-                )}
-              </button>
-
-              <p className="mt-3 text-xs leading-relaxed text-ink-muted">
-                Your photo and coordinates are stored so authorities can locate the hazard. Reports are
-                public on the road map.
-              </p>
             </div>
-          </aside>
-        </form>
+
+            {/* Action bar: pinned to the bottom of the screen on phones, inline on desktop. */}
+            <div className="fixed inset-x-0 bottom-0 z-[900] border-t border-ink-line bg-white/90 px-4 py-3 backdrop-blur-xl sm:static sm:mt-5 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+              <div className="mx-auto flex max-w-3xl items-center gap-3">
+                {step > 0 ? (
+                  <button type="button" onClick={() => go(step - 1)} disabled={submitting} className="btn-secondary px-4 py-3">
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    {t('rep.back')}
+                  </button>
+                ) : (
+                  <span className="hidden text-sm text-ink-muted sm:block">{!stepValid[0] && blockedHint}</span>
+                )}
+                {step > 0 && !stepValid[step] && (
+                  <span className="hidden text-sm text-ink-muted sm:block">{blockedHint}</span>
+                )}
+                <button
+                  type="submit"
+                  disabled={!stepValid[step] || submitting}
+                  className={`btn-primary ml-auto flex-1 py-3 sm:flex-none sm:px-7 ${
+                    stepValid[step] && !submitting ? 'btn-glow' : ''
+                  }`}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      {t('rep.submitting')}
+                    </>
+                  ) : step === STEPS.length - 1 ? (
+                    <>
+                      <Send className="h-4 w-4" aria-hidden="true" />
+                      {nextLabel}
+                    </>
+                  ) : (
+                    <>
+                      {nextLabel}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );

@@ -21,7 +21,7 @@ const SEV_COLORS = { LOW: '#16a34a', MODERATE: '#f59e0b', HIGH: '#ea580c', CRITI
 
 const tooltipStyle = {
   borderRadius: 12,
-  border: '1px solid #e4e5ef',
+  border: '1px solid #e1e8e4',
   boxShadow: '0 12px 32px rgba(20,21,43,0.12)',
   fontSize: 13,
 };
@@ -121,7 +121,7 @@ export default function Dashboard() {
       <div className="container-page py-8 sm:py-10">
         {/* headline stats */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Headline statistics">
-          <StatCard label="Total reports" value={stats.totals.total} icon={FileBarChart} accent="#4c1d95" />
+          <StatCard label="Total reports" value={stats.totals.total} icon={FileBarChart} accent="#006a4e" />
           <StatCard
             label="Critical hazards"
             value={stats.severity.critical}
@@ -148,7 +148,7 @@ export default function Dashboard() {
           <StatCard label="High severity" value={stats.severity.high} accent="#ea580c" />
           <StatCard label="Moderate severity" value={stats.severity.moderate} accent="#f59e0b" />
           <StatCard label="Low severity" value={stats.severity.low} accent="#16a34a" />
-          <StatCard label="Contributors" value={stats.totals.contributors} icon={Users} accent="#7c3aed" />
+          <StatCard label="Contributors" value={stats.totals.contributors} icon={Users} accent="#0c8158" />
         </section>
 
         {/* pipeline health — staff only */}
@@ -197,15 +197,15 @@ export default function Dashboard() {
               <AreaChart data={timeData} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="fillReports" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#0c8158" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#0c8158" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Area type="monotone" dataKey="reports" name="Reports" stroke="#7c3aed" strokeWidth={2} fill="url(#fillReports)" />
+                <Area type="monotone" dataKey="reports" name="Reports" stroke="#0c8158" strokeWidth={2} fill="url(#fillReports)" />
                 <Area type="monotone" dataKey="critical" name="Critical" stroke="#dc2626" strokeWidth={2} fill="none" />
               </AreaChart>
             </ResponsiveContainer>
@@ -246,11 +246,11 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={hazardData} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b6f8a' }} tickLine={false} axisLine={false} interval={0} angle={-18} textAnchor="end" height={54} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#faf5ff' }} />
-                  <Bar dataKey="count" name="Reports" radius={[6, 6, 0, 0]} fill="#6d28d9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#66786f' }} tickLine={false} axisLine={false} interval={0} angle={-18} textAnchor="end" height={54} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#eefbf4' }} />
+                  <Bar dataKey="count" name="Reports" radius={[6, 6, 0, 0]} fill="#006a4e" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -266,11 +266,11 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={charts.districts} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" horizontal={false} />
-                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="district" width={90} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#faf5ff' }} />
-                  <Bar dataKey="count" name="Reports" radius={[0, 6, 6, 0]} fill="#c026d3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="district" width={90} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#eefbf4' }} />
+                  <Bar dataKey="count" name="Reports" radius={[0, 6, 6, 0]} fill="#1ba06d" />
                 </BarChart>
               </ResponsiveContainer>
             )}
