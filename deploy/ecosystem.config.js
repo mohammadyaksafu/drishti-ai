@@ -1,6 +1,6 @@
-// PM2 process file for the Node API on the VPS.
-// The ML worker is deliberately not here: it runs on the local AI machine and
-// reaches MongoDB and Cloudinary outbound, exactly as in the Vercel setup.
+// PM2 process file for DRISHTI AI on the VPS: the Node API and the ML worker.
+// The worker only makes outbound connections (MongoDB Atlas, Cloudinary), so it
+// needs no port; it polls the job queue and writes results straight back.
 module.exports = {
   apps: [
     {
@@ -15,6 +15,20 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 5000,
+      },
+    },
+    {
+      // Set up by deploy/setup-ml.sh (virtualenv, ONNX models, ml-backend/.env).
+      name: 'drishti-ml',
+      cwd: '/var/www/drishti-ai/ml-backend',
+      script: 'services/worker.py',
+      interpreter: '/opt/drishti-ml-venv/bin/python',
+      instances: 1,
+      autorestart: true,
+      max_memory_restart: '1200M',
+      exp_backoff_restart_delay: 5000,
+      env: {
+        PYTHONUNBUFFERED: '1',
       },
     },
   ],

@@ -56,7 +56,7 @@ npm ci
 VITE_API_BASE_URL=/api npm run build
 
 echo "==> API (PM2)"
-pm2 startOrReload "$APP_DIR/deploy/ecosystem.config.js" --update-env
+pm2 startOrReload "$APP_DIR/deploy/ecosystem.config.js" --only drishti-api --update-env
 pm2 save
 
 echo "==> Web (Caddy: https://$DOMAIN, redirect from :$PORT)"
