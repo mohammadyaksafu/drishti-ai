@@ -21,7 +21,7 @@ const SEV_COLORS = { LOW: '#16a34a', MODERATE: '#f59e0b', HIGH: '#ea580c', CRITI
 
 const tooltipStyle = {
   borderRadius: 12,
-  border: '1px solid #e4e5ef',
+  border: '1px solid #e1e8e4',
   boxShadow: '0 12px 32px rgba(20,21,43,0.12)',
   fontSize: 13,
 };
@@ -201,9 +201,9 @@ export default function Dashboard() {
                     <stop offset="100%" stopColor="#0c8158" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Area type="monotone" dataKey="reports" name="Reports" stroke="#0c8158" strokeWidth={2} fill="url(#fillReports)" />
                 <Area type="monotone" dataKey="critical" name="Critical" stroke="#dc2626" strokeWidth={2} fill="none" />
@@ -246,10 +246,10 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={hazardData} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b6f8a' }} tickLine={false} axisLine={false} interval={0} angle={-18} textAnchor="end" height={54} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#faf5ff' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#66786f' }} tickLine={false} axisLine={false} interval={0} angle={-18} textAnchor="end" height={54} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#eefbf4' }} />
                   <Bar dataKey="count" name="Reports" radius={[6, 6, 0, 0]} fill="#006a4e" />
                 </BarChart>
               </ResponsiveContainer>
@@ -266,11 +266,11 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={charts.districts} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ececf4" horizontal={false} />
-                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="district" width={90} tick={{ fontSize: 11, fill: '#6b6f8a' }} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#faf5ff' }} />
-                  <Bar dataKey="count" name="Reports" radius={[0, 6, 6, 0]} fill="#c026d3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e6ede9" horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="district" width={90} tick={{ fontSize: 11, fill: '#66786f' }} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#eefbf4' }} />
+                  <Bar dataKey="count" name="Reports" radius={[0, 6, 6, 0]} fill="#1ba06d" />
                 </BarChart>
               </ResponsiveContainer>
             )}
