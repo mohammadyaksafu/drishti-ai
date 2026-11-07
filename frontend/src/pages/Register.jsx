@@ -4,9 +4,11 @@ import { Loader2, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { DIVISIONS } from '../utils/bangladesh';
 import AuthLayout from '../components/AuthLayout';
+import { useLang } from '../i18n';
 
 export default function Register() {
   const { register } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -26,8 +28,8 @@ export default function Register() {
     event.preventDefault();
     setError('');
 
-    if (form.password.length < 8) return setError('Your password needs at least 8 characters.');
-    if (form.password !== form.confirm) return setError('The two passwords do not match.');
+    if (form.password.length < 8) return setError(t('reg.err.short'));
+    if (form.password !== form.confirm) return setError(t('reg.err.match'));
 
     setBusy(true);
     try {
@@ -47,38 +49,38 @@ export default function Register() {
 
   return (
     <AuthLayout
-      eyebrow="Join the network"
-      title="Create your account"
-      description="Report hazards, follow their analysis, and see when they get fixed."
+      eyebrow={t('reg.eyebrow')}
+      title={t('reg.title')}
+      description={t('reg.desc')}
       footer={
         <>
-          Already have an account?{' '}
+          {t('reg.have')}{' '}
           <Link to="/login" className="font-semibold text-brand-700 hover:text-brand-600">
-            Sign in
+            {t('reg.signIn')}
           </Link>
         </>
       }
     >
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="name" className="label">Full name</label>
+          <label htmlFor="name" className="label">{t('f.name')}</label>
           <input id="name" type="text" required autoComplete="name" className="field" value={form.name} onChange={set('name')} />
         </div>
 
         <div>
-          <label htmlFor="email" className="label">Email</label>
+          <label htmlFor="email" className="label">{t('f.email')}</label>
           <input id="email" type="email" required autoComplete="email" className="field" value={form.email} onChange={set('email')} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="phone" className="label">Phone <span className="font-normal text-ink-muted">(optional)</span></label>
+            <label htmlFor="phone" className="label">{t('f.phone')} <span className="font-normal text-ink-muted">{t('f.optional')}</span></label>
             <input id="phone" type="tel" autoComplete="tel" className="field" placeholder="01XXXXXXXXX" value={form.phone} onChange={set('phone')} />
           </div>
           <div>
-            <label htmlFor="district" className="label">Division</label>
+            <label htmlFor="district" className="label">{t('f.division')}</label>
             <select id="district" className="field" value={form.district} onChange={set('district')}>
-              <option value="">Select…</option>
+              <option value="">{t('f.select')}</option>
               {DIVISIONS.map((d) => (
                 <option key={d.name} value={d.name}>{d.name}</option>
               ))}
@@ -88,11 +90,11 @@ export default function Register() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="password" className="label">Password</label>
+            <label htmlFor="password" className="label">{t('f.password')}</label>
             <input id="password" type="password" required minLength={8} autoComplete="new-password" className="field" value={form.password} onChange={set('password')} />
           </div>
           <div>
-            <label htmlFor="confirm" className="label">Confirm password</label>
+            <label htmlFor="confirm" className="label">{t('f.confirm')}</label>
             <input id="confirm" type="password" required autoComplete="new-password" className="field" value={form.confirm} onChange={set('confirm')} />
           </div>
         </div>
@@ -109,7 +111,7 @@ export default function Register() {
           ) : (
             <UserPlus className="h-4 w-4" aria-hidden="true" />
           )}
-          Create account
+          {t('reg.submit')}
         </button>
       </form>
     </AuthLayout>

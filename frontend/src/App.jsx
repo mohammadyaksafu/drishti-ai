@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import SloganBar from './components/SloganBar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -28,6 +29,7 @@ export default function App() {
             Skip to content
           </a>
 
+          <SloganBar />
           <Navbar />
 
           <main id="main" className="flex-1">

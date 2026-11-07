@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { Loader2, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthLayout from '../components/AuthLayout';
+import { useLang } from '../i18n';
 
 export default function Login() {
   const { login } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -31,27 +33,27 @@ export default function Login() {
 
   return (
     <AuthLayout
-      eyebrow="Welcome back"
-      title="Sign in to DRISHTI AI"
-      description="An account lets you submit reports and track what happens to them."
+      eyebrow={t('login.eyebrow')}
+      title={t('login.title')}
+      description={t('login.desc')}
       footer={
         <>
-          New here?{' '}
+          {t('login.new')}{' '}
           <Link to="/register" className="font-semibold text-brand-700 hover:text-brand-600">
-            Create an account
+            {t('login.create')}
           </Link>
         </>
       }
     >
       {params.get('expired') && (
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          Your session expired. Sign in again to continue.
+          {t('login.expired')}
         </p>
       )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="email" className="label">Email</label>
+          <label htmlFor="email" className="label">{t('f.email')}</label>
           <input
             id="email"
             type="email"
@@ -64,7 +66,7 @@ export default function Login() {
         </div>
 
         <div>
-          <label htmlFor="password" className="label">Password</label>
+          <label htmlFor="password" className="label">{t('f.password')}</label>
           <input
             id="password"
             type="password"
@@ -88,7 +90,7 @@ export default function Login() {
           ) : (
             <LogIn className="h-4 w-4" aria-hidden="true" />
           )}
-          Sign in
+          {t('login.submit')}
         </button>
       </form>
     </AuthLayout>
